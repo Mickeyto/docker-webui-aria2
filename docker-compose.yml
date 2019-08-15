@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+    aria2:
+        env_file:
+          - '.env'
+        command: 'aria2c --dir=/var/lib/seedbox --enable-dht=false --enable-rpc --log=- --log-level=notice --max-concurrent-downloads=10 --quiet --rpc-listen-all=true --rpc-save-upload-metadata=false --rpc-secret=${RPC_SECRET}'
+        environment:
+            - 'USER=nobody'
+        image: timonier/aria2:latest
+        init: true
+        ports:
+            - '6800:6800'
+        read_only: true
+        volumes:
+            - '${DOWNLOAD_DIR}:/var/lib/seedbox:rw'
+        depends_on:
+            - local-webuiaria2
+
+    local-webuiaria2:
+        image: timonier/webui-aria2:latest
+        ports:
+          - '${WEBUI_LOCAL_PORT}:${WEBUI_CONTAINER_PORT}'
+
+    webui-aria2:
+        build:
+            context: src/.
+            dockerfile: Dockerfile
+        image: timonier/webui-aria2:latest
+        read_only: true
+        tmpfs:
+            - '/run:exec'
+            - '/var/cache/nginx'
+        volumes:
+            - '/etc/nginx'

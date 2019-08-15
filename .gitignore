@@ -1,0 +1,6 @@
+.env-template
+/docker-compose.*.yml
+/generated/*
+!generated/.gitkeep
+/data
+/downloaded
